@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/bin/bash
 
 # Eric's custom enumeration tool
 
@@ -45,14 +45,6 @@ findomain -q -t $1 -u findomain.txt
 sleep 2
 echo -e "${GREEN}Subdomains acquired from Findomain!${ENDCOLOR}"
 sleep 2
-
-# Getting subdomains from Amass
-
-# echo -e "${GREEN}Getting subdomains from Amass${ENDCOLOR}"
-# amass enum -d $1 | tee amass.txt
-# sleep 2
-# echo -e "${GREEN}Subdomains acquired from Amass!${ENDCOLOR}"  
-# sleep 2
 
 # Add all acquired subdomains to subdomains/initial
 
