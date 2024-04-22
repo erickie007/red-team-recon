@@ -84,7 +84,7 @@ sleep 2
 # Getting wayback urls with gauplus
 echo -e "${GREEN}Getting waybackurls${ENDCOLOR}"
 sleep 2
-cat subdomains-out.txt | gauplus | tee gauplus-out.txt
+cat subdomains-out.txt | waybackurls | tee waybackurls-out.txt
 sleep 2
 echo -e "${GREEN}waybackurls completed successfully.${ENDCOLOR}"
 sleep 2
@@ -108,7 +108,7 @@ sleep 2
 # Potential IDOR URLs
 echo -e "${GREEN}Getting potential IDOR URLs with gf${ENDCOLOR}"
 sleep 2
-cat gauplus-out.txt | gf idor | tee potential_IDOR_urls.txt
+cat waybackurls-out.txt | gf idor | tee potential_IDOR_urls.txt
 sleep 2
 echo -e "${GREEN}Potential IDOR URLs added.${ENDCOLOR}"
 sleep 2
@@ -116,7 +116,7 @@ sleep 2
 # Potential Open Redirect URLs
 echo -e "${GREEN}Getting potential Open Redirect URLs with gf${ENDCOLOR}"
 sleep 2
-cat gauplus-out.txt | gf redirect | tee potential_openredirect_urls.txt
+cat waybackurls-out.txt | gf redirect | tee potential_openredirect_urls.txt
 sleep 2
 echo -e "${GREEN}Potential Open Redirect URLs added.${ENDCOLOR}"
 sleep 2
@@ -140,7 +140,7 @@ echo -e "${GREEN}All enumeration has completed successfully! Happy Hacking!${END
 
 echo -e "${GREEN}Finding xss, sql, ssrf, open-redirect with Nuclei...!${ENDCOLOR}"
 sleep 2
-cat gauplus-out.txt | grep "\?" | uro | httpx -silent > potentially_vulnerable_parameters.txt
+cat waybackurls-out.txt | grep "\?" | uro | httpx -silent > potentially_vulnerable_parameters.txt
 sleep 2
 nuclei -l potentially_vulnerable_parameters.txt -es info -o nuclei_potentially_vulnerable_parameters.txt
 sleep 2
@@ -149,6 +149,6 @@ echo -e "${GREEN}Nuclei completed successfully!${ENDCOLOR}"
 # Running sqlmap against gauplus
 echo -e "${GREEN}Starting SQLMap against waybackurls...!${ENDCOLOR}"
 sleep 2
-cat gauplus-out.txt | gf sqli | tee potential_SQLi_URLs.txt 
+cat waybackurls-out.txt | gf sqli | tee potential_SQLi_URLs.txt 
 sqlmap -m potential_SQLi_URLs.txt --dbs --batch --random-agent 
 echo -e "${GREEN}Success!! Happy Hacking!${ENDCOLOR}"
