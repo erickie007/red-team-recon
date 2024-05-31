@@ -151,4 +151,4 @@ echo -e "${ORANGE}Starting SQLMap against waybackurls...!${ENDCOLOR}"
 sleep 2
 cat waybackurls-out.txt | gf sqli | tee potential_SQLi_URLs.txt 
 sqlmap -m potential_SQLi_URLs.txt --dbs --batch --random-agent 
-echo -e "${GREEN}Success!! Happy Hacking!${ENDCOLOR}"
+echo -e "${ORANGE}Success!! Happy Hacking!${ENDCOLOR}"
