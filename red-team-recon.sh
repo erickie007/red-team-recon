@@ -15,11 +15,17 @@ echo -e "${RED}Welcome to CGA Red Team Recon!${ENDCOLOR}"
 sleep 3
 
 # Get subdomains from Subcat
-
 echo -e "${ORANGE}Getting subdomains from Subcat...${ENDCOLOR}"
 python3 ~/tools/subcat/subcat.py --silent -d $1 | tee -a subcat.txt
 sleep 2
 echo -e "${GREEN}Subdomains acquired from Subcat!${ENDCOLOR}"
+sleep 2
+
+# Get subdomains from ctfr
+echo -e "${ORANGE}Getting subdomains from ctfr...${ENDCOLOR}"
+python3 ~/tools/ctfr/ctfr.py -d $1 -o ctfr.txt
+sleep 2
+echo -e "${GREEN}Subdomains acquired from ctfr!${ENDCOLOR}"
 sleep 2
 
 # Get subdomains from Assetfinder
@@ -52,6 +58,8 @@ echo -e "${ORANGE}Compiling acquired subdomains to subdomains-out.txt${ENDCOLOR}
 sleep 2
 cat subcat.txt | anew subdomains-out.txt
 sleep 1
+cat ctfr.txt | anew subdomains-out.txt
+sleep 1
 cat findomain.txt | anew subdomains-out.txt
 sleep 1
 cat subfinder.txt | anew subdomains-out.txt
@@ -76,7 +84,7 @@ sleep 2
 
 echo -e "${ORANGE}Cleaning up...please wait!${ENDCOLOR}"
 sleep 2
-rm findomain.txt subfinder.txt subcat.txt assetfinder.txt
+rm findomain.txt subfinder.txt subcat.txt assetfinder.txt ctfr.txt
 sleep 2
 echo -e "${GREEN}All done! Happy hacking!${ENDCOLOR}"
 sleep 2
