@@ -113,6 +113,14 @@ sleep 2
 echo -e "${GREEN}WafW00f completed successfully.${ENDCOLOR}"
 sleep 2
 
+# Get exposed .git files
+echo -e "${ORANGE}Getting exposed .git files${ENDCOLOR}"
+cat subdomains-out.txt | subgit | tee git-exposed-urls.txt
+cat waybackurls-out.txt | subgit | anew git-exposed-urls.txt
+cat live_domains.txt | subgit | anew git-exposed-urls.txt
+
+echo -e "${GREEN}Scan completed.${ENDCOLOR}"
+
 # Potential IDOR URLs
 echo -e "${ORANGE}Getting potential IDOR URLs with gf${ENDCOLOR}"
 sleep 2
