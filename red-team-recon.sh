@@ -50,7 +50,7 @@ echo -e "${ORANGE}Getting subdomains from Findomain${ENDCOLOR}"
 findomain -q -t $1 -u findomain.txt
 sleep 2
 echo -e "${GREEN}Subdomains acquired from Findomain!${ENDCOLOR}"
-sleep 2
+sleep 5
 
 # Add all acquired subdomains to subdomains/initial
 
@@ -63,17 +63,15 @@ sleep 1
 cat findomain.txt | anew subdomains-out.txt
 sleep 1
 cat subfinder.txt | anew subdomains-out.txt
-# sleep 1
-# cat amass.txt | anew subdomains-out.txt
 sleep 1
 cat assetfinder.txt | anew subdomains-out.txt
 sleep 1
 echo -e "${GREEN}All subdomains are added to subdomains-out.txt${ENDCOLOR}"
-sleep 2
+sleep 5
 
 # Check for live subdomains from initial.txt
 
-echo -e "${ORANGE}Checking for live subdomains...Grab some cofee.${ENDCOLOR}"
+echo -e "${ORANGE}Checking for live subdomains...Grab some coffee.${ENDCOLOR}"
 sleep 2
 cat subdomains-out.txt | httpx -silent | sort -u | tee -a live_domains.txt  
 sleep 2
@@ -116,9 +114,7 @@ sleep 2
 # Get exposed .git files
 echo -e "${ORANGE}Getting exposed .git files${ENDCOLOR}"
 cat subdomains-out.txt | subgit | tee git-exposed-urls.txt
-cat waybackurls-out.txt | subgit | anew git-exposed-urls.txt
 cat live_domains.txt | subgit | anew git-exposed-urls.txt
-
 echo -e "${GREEN}Scan completed.${ENDCOLOR}"
 
 # Potential IDOR URLs
@@ -143,6 +139,22 @@ sleep 2
 cat live_domains.txt | xargs -I{} host {} | tee -a hosts-out.txt
 sleep 2
 echo -e "${GREEN}Hosts information added successfully.${ENDCOLOR}"
+sleep 2
+
+# Extract IPs from subdomains
+echo -e "${ORANGE}Extracting IPs from subdomains${ENDCOLOR}"
+sleep 2
+cat subdomains-out.txt | nslookup | grep 'Address:' | awk '{print $2}' | grep -oE "\b([0-9]{1,3}\.){3}[0-9]{1,3}\b" | sort | uniq
+sleep 2
+echo -e "${GREEN}IPs extracted and saved.${ENDCOLOR}"
+sleep 5
+
+# Scanning for open ports
+echo -e "${ORANGE}Scanning for open ports with nmap${ENDCOLOR}"
+sleep 2
+sudo nmap -sS -sC -sV -T4 -iL subdomains-out.txt -oN nmap-out.txt
+sleep 2
+echo -e "${GREEN}Scan completed.${ENDCOLOR}"
 sleep 2
 
 # Starting Nuclei
