@@ -117,6 +117,11 @@ cat subdomains-out.txt | subgit | tee git-exposed-urls.txt
 cat live_domains.txt | subgit | anew git-exposed-urls.txt
 echo -e "${GREEN}Scan completed.${ENDCOLOR}"
 
+# Crawl with Photon
+echo -e "${ORANGE}Crawling with Photon${ENDCOLOR}"
+python3 ~/tools/Photon/photon.py -u $1 --wayback
+echo -e "${GREEN}Crawl completed.${ENDCOLOR}"
+
 # Potential IDOR URLs
 echo -e "${ORANGE}Getting potential IDOR URLs with gf${ENDCOLOR}"
 sleep 2
