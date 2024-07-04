@@ -11,7 +11,7 @@ ENDCOLOR="\e[0m"
 
 # Introduction
 
-echo -e "${RED}Welcome to CGA Red Team Recon!${ENDCOLOR}"
+echo -e "${RED}Welcome to the Red Team Recon Lab!${ENDCOLOR}"
 sleep 3
 
 # Get subdomains from Subcat
@@ -56,24 +56,24 @@ sleep 5
 
 echo -e "${ORANGE}Compiling acquired subdomains to subdomains-out.txt${ENDCOLOR}"
 sleep 2
-cat subcat.txt | anew subdomains-out.txt
+cat subcat.txt | anew subdomains.txt
 sleep 1
-cat ctfr.txt | anew subdomains-out.txt
+cat ctfr.txt | anew subdomains.txt
 sleep 1
-cat findomain.txt | anew subdomains-out.txt
+cat findomain.txt | anew subdomains.txt
 sleep 1
-cat subfinder.txt | anew subdomains-out.txt
+cat subfinder.txt | anew subdomains.txt
 sleep 1
-cat assetfinder.txt | anew subdomains-out.txt
+cat assetfinder.txt | anew subdomains.txt
 sleep 1
-echo -e "${GREEN}All subdomains are added to subdomains-out.txt${ENDCOLOR}"
+echo -e "${GREEN}All subdomains are added to subdomains.txt${ENDCOLOR}"
 sleep 5
 
 # Check for live subdomains from initial.txt
 
 echo -e "${ORANGE}Checking for live subdomains...Grab some coffee.${ENDCOLOR}"
 sleep 2
-cat subdomains-out.txt | httpx -silent | sort -u | tee -a live_domains.txt  
+cat subdomains.txt | httpx -silent | sort -u | tee -a live_domains.txt  
 sleep 2
 echo -e "${GREEN}All live subdomains have been added to live_domains.txt.${ENDCOLOR}"
 sleep 2
@@ -87,33 +87,67 @@ sleep 2
 echo -e "${GREEN}All done! Happy hacking!${ENDCOLOR}"
 sleep 2
 
-# Getting wayback urls with gauplus
+# Getting wayback urls
 echo -e "${ORANGE}Getting waybackurls${ENDCOLOR}"
 sleep 2
-cat subdomains-out.txt | waybackurls | tee waybackurls-out.txt
+cat subdomains.txt | waybackurls | tee waybackurls.txt
 sleep 2
 echo -e "${GREEN}waybackurls completed successfully.${ENDCOLOR}"
 sleep 2
 
-# Getting URLs and JavaScript files with Hakrawler
-echo -e "${ORANGE}Getting URLs and JavaScript files with Hakrawler${ENDCOLOR}"
+# Cleaning up waybackuls
+echo -e "${ORANGE}Cleaning up waybackurls${ENDCOLOR}"
 sleep 2
-cat live_domains.txt | hakrawler | tee urls-js-out.txt
+input_file="waybackurls.txt"
+output_file="filtered_waybackurls.txt"
+# Ensure the input file exists
+if [ ! -f "$input_file" ]; then
+    echo "Input file $input_file not found."
+    exit 1
+fi
+# Remove URLs ending with common image file extensions
+grep -Ev "\.(jpg|jpeg|png|gif|bmp|tif|tiff|ico|svg|webp)$" "$input_file" > "$output_file"
+echo -e "${GREEN}filtered waybackurls saved successfully.${ENDCOLOR}"
 sleep 2
-echo -e "${GREEN}Hakrawler completed successfully.${ENDCOLOR}"
+
+# Filter waybackurl parameters
+echo -e "${ORANGE}Filtering waybackurls parameters!${ENDCOLOR}"
+sleep 2
+cat waybackurls.txt | grep "\?" | uro | httpx -silent > filtered_parameters.txt
+cat filtered_waybackurls.txt | uro | anew filtered_parameters.txt
+sleep 2
+echo -e "${GREEN}Filtered URLs saved successfully!${ENDCOLOR}"
+sleep 2
+
+# Crawl urls with Katana
+echo -e "${ORANGE}Crawling URLs with Katana...${ENDCOLOR}"
+sleep 2
+katana -u live_domains.txt -d 5 -ps -pss waybackarchive,commoncrawl,alienvault -kf -jc -fx -ef woff,css,png,svg,jpg,woff2,jpeg,gif,svg -o allurls.txt
+cat allurls.txt | anew filtered_parameters.txt
+sleep 2
+echo -e "${GREEN}URL crawling completed successfully.${ENDCOLOR}"
+sleep 2
+
+# Js File enumeration
+echo -e "${ORANGE}Enumerating Js files!${ENDCOLOR}"
+sleep 2
+cat filtered_parameters.txt | grep ".js$" | tee js-files.txt
+cat live_domains.txt | hakrawler | grep ".js$" | anew  js-files.txt
+sleep 2
+echo -e "${GREEN}Js enumeration completed successfully.${ENDCOLOR}"
 sleep 2
 
 # Getting WAFs for all subdomains
 echo -e "${ORANGE}Getting WAF information for all subdomains${ENDCOLOR}"
 sleep 2
-wafw00f -a -i live_domains.txt -o waf-out.txt
+wafw00f -a -i live_domains.txt -o waf.txt
 sleep 2
 echo -e "${GREEN}WafW00f completed successfully.${ENDCOLOR}"
 sleep 2
 
 # Get exposed .git files
 echo -e "${ORANGE}Getting exposed .git files${ENDCOLOR}"
-cat subdomains-out.txt | subgit | tee git-exposed-urls.txt
+cat subdomains.txt | subgit | tee git-exposed-urls.txt
 cat live_domains.txt | subgit | anew git-exposed-urls.txt
 echo -e "${GREEN}Scan completed.${ENDCOLOR}"
 
@@ -125,7 +159,7 @@ echo -e "${GREEN}Crawl completed.${ENDCOLOR}"
 # Potential IDOR URLs
 echo -e "${ORANGE}Getting potential IDOR URLs with gf${ENDCOLOR}"
 sleep 2
-cat waybackurls-out.txt | gf idor | tee potential_IDOR_urls.txt
+cat waybackurls.txt | gf idor | tee potential_IDOR_urls.txt
 sleep 2
 echo -e "${GREEN}Potential IDOR URLs added.${ENDCOLOR}"
 sleep 2
@@ -133,7 +167,7 @@ sleep 2
 # Potential Open Redirect URLs
 echo -e "${ORANGE}Getting potential Open Redirect URLs with gf${ENDCOLOR}"
 sleep 2
-cat waybackurls-out.txt | gf redirect | tee potential_openredirect_urls.txt
+cat waybackurls.txt | gf redirect | tee potential_openredirect_urls.txt
 sleep 2
 echo -e "${GREEN}Potential Open Redirect URLs added.${ENDCOLOR}"
 sleep 2
@@ -141,47 +175,55 @@ sleep 2
 # Check for hosts
 echo -e "${ORANGE}Getting hosts information${ENDCOLOR}"
 sleep 2
-cat live_domains.txt | xargs -I{} host {} | tee -a hosts-out.txt
+cat live_domains.txt | xargs -I{} host {} | tee -a hosts.txt
 sleep 2
 echo -e "${GREEN}Hosts information added successfully.${ENDCOLOR}"
+sleep 2
+
+# Check for subdomain takeover
+echo -e "${ORANGE}Checking for subdomain takeover...${ENDCOLOR}"
+sleep 2
+subzy run --targets subdomains.txt --concurrency 100 --hide_fails --verify_ssl --output subdomains-takeover.txt
+sleep 2
+echo -e "${GREEN}Subdomains takeover scan completed successfully.${ENDCOLOR}"
 sleep 2
 
 # Extract IPs from subdomains
 echo -e "${ORANGE}Extracting IPs from subdomains${ENDCOLOR}"
 sleep 2
-cat subdomains-out.txt | nslookup | grep 'Address:' | awk '{print $2}' | grep -oE "\b([0-9]{1,3}\.){3}[0-9]{1,3}\b" | sort | uniq
+cat subdomains.txt | nslookup | grep 'Address:' | awk '{print $2}' | grep -oE "\b([0-9]{1,3}\.){3}[0-9]{1,3}\b" | sort | uniq | tee ip-addresses.txt
 sleep 2
 echo -e "${GREEN}IPs extracted and saved.${ENDCOLOR}"
-sleep 5
+sleep 2
 
 # Scanning for open ports
 echo -e "${ORANGE}Scanning for open ports with nmap${ENDCOLOR}"
 sleep 2
-sudo nmap -sS -sC -sV -T4 -iL subdomains-out.txt -oN nmap-out.txt
+sudo nmap -sS -sC -sV -T4 -iL ip-addresses.txt --script vuln -oN nmap.txt
 sleep 2
 echo -e "${GREEN}Scan completed.${ENDCOLOR}"
 sleep 2
 
 # Starting Nuclei
-echo -e "${ORANGE}Starting Nuclei against live subdomains...!${ENDCOLOR}"
+echo -e "${ORANGE}Starting Nuclei against live and filtered subdomains...!${ENDCOLOR}"
 sleep 2
-nuclei -l live_domains.txt -es info -o nuclei.txt
+cat live_domains.txt | anew nuclei-urls.txt
+cat filtered_parameters.txt | anew nuclei-urls.txt
+nuclei -l nuclei-urls.txt -es info -o nuclei.txt
 sleep 2
 echo -e "${GREEN}All enumeration has completed successfully! Happy Hacking!${ENDCOLOR}"
 
-# Finding xss, sql, ssrf, open-redirect with Nuclei
-
-echo -e "${ORANGE}Finding xss, sql, ssrf, open-redirect with Nuclei...!${ENDCOLOR}"
-sleep 2
-cat waybackurls-out.txt | grep "\?" | uro | httpx -silent > potentially_vulnerable_parameters.txt
-sleep 2
-nuclei -l potentially_vulnerable_parameters.txt -es info -o nuclei_potentially_vulnerable_parameters.txt
-sleep 2
-echo -e "${GREEN}Nuclei completed successfully!${ENDCOLOR}"
-
-# Running sqlmap against gauplus
+# Running sqlmap against waybackurls
 echo -e "${ORANGE}Starting SQLMap against waybackurls...!${ENDCOLOR}"
 sleep 2
-cat waybackurls-out.txt | gf sqli | tee potential_SQLi_URLs.txt 
+cat waybackurls.txt | gf sqli | tee potential_SQLi_URLs.txt 
+cat filtered_parameters.txt | gf sqli | anew potential_SQLi_URLs.txt
 sqlmap -m potential_SQLi_URLs.txt --dbs --batch --random-agent 
-echo -e "${ORANGE}Success!! Happy Hacking!${ENDCOLOR}"
+echo -e "${GREEN}Scan completed.${ENDCOLOR}"
+sleep 5
+
+# Cleanup
+echo -e "${ORANGE}Cleaning up...!${ENDCOLOR}"
+rm filtered_waybackurls.txt allurls.txt 
+sleep 2
+echo -e "${RED}Done. Happy Hacking!!${ENDCOLOR}"
