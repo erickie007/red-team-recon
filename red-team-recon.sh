@@ -11,7 +11,25 @@ ENDCOLOR="\e[0m"
 
 # Introduction
 
-echo -e "${RED}Welcome to the Red Team Recon Lab!${ENDCOLOR}"
+# Function to display ANSI art
+display_art() {
+    # Set text color to green (ANSI escape code for green is \e[32m)
+    echo -e "\e[32m"
+
+    # Display ASCII art
+    cat << "EOF"
+ ____          _   _____                      ____                      
+|  _ \ ___  __| | |_   _|__  __ _ _ __ ___   |  _ \ ___  ___ ___  _ __  
+| |_) / _ \/ _` |   | |/ _ \/ _` | '_ ` _ \  | |_) / _ \/ __/ _ \| '_ \ 
+|  _ <  __/ (_| |   | |  __/ (_| | | | | | | |  _ <  __/ (_| (_) | | | |
+|_| \_\___|\__,_|   |_|\___|\__,_|_| |_| |_| |_| \_\___|\___\___/|_| |_|    
+
+EOF
+    # Reset text color
+    echo -e "\e[0m"
+}
+# Call the function to display the art
+display_art
 sleep 3
 
 # Get subdomains from Subcat
@@ -209,6 +227,7 @@ echo -e "${ORANGE}Starting Nuclei against live and filtered subdomains...!${ENDC
 sleep 2
 cat live_domains.txt | anew nuclei-urls.txt
 cat filtered_parameters.txt | anew nuclei-urls.txt
+nuclei -ut -up
 nuclei -l nuclei-urls.txt -es info -o nuclei.txt
 sleep 2
 echo -e "${GREEN}All enumeration has completed successfully! Happy Hacking!${ENDCOLOR}"
