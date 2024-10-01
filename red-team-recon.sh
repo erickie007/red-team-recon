@@ -177,7 +177,7 @@ echo -e "${GREEN}Crawl completed.${ENDCOLOR}"
 # Potential IDOR URLs
 echo -e "${ORANGE}Getting potential IDOR URLs with gf${ENDCOLOR}"
 sleep 2
-cat waybackurls.txt | gf idor | tee potential_IDOR_urls.txt
+cat waybackurls.txt | ~/go/bin/gf idor | tee potential_IDOR_urls.txt
 sleep 2
 echo -e "${GREEN}Potential IDOR URLs added.${ENDCOLOR}"
 sleep 2
@@ -185,7 +185,7 @@ sleep 2
 # Potential Open Redirect URLs
 echo -e "${ORANGE}Getting potential Open Redirect URLs with gf${ENDCOLOR}"
 sleep 2
-cat waybackurls.txt | gf redirect | tee potential_openredirect_urls.txt
+cat waybackurls.txt | ~/go/bin/gf redirect | tee potential_openredirect_urls.txt
 sleep 2
 echo -e "${GREEN}Potential Open Redirect URLs added.${ENDCOLOR}"
 sleep 2
@@ -235,8 +235,8 @@ echo -e "${GREEN}All enumeration has completed successfully! Happy Hacking!${END
 # Running sqlmap against waybackurls
 echo -e "${ORANGE}Starting SQLMap against waybackurls...!${ENDCOLOR}"
 sleep 2
-cat waybackurls.txt | gf sqli | tee potential_SQLi_URLs.txt 
-cat filtered_parameters.txt | gf sqli | anew potential_SQLi_URLs.txt
+cat waybackurls.txt | ~/go/bin/gf sqli | tee potential_SQLi_URLs.txt 
+cat filtered_parameters.txt | ~/go/bin/gf sqli | anew potential_SQLi_URLs.txt
 sqlmap -m potential_SQLi_URLs.txt --dbs --batch --random-agent 
 echo -e "${GREEN}Scan completed.${ENDCOLOR}"
 sleep 5
